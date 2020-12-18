@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AzureMessagingDemos": {
+      "commandName": "Project",
+      "commandLineArgs": "EventGrid"
+    }
+  }
+}

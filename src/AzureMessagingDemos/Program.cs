@@ -15,12 +15,23 @@ namespace AzureMessagingDemos
 
             var configuration = builder.Build();
 
-            var serviceBusSendConnectionString = configuration.GetValue<string>("ServiceBusSendConnectionString");
-            var serviceBusListenConnectionString = configuration.GetValue<string>("ServiceBusListenConnectionString");
+            if (string.Compare(args[0], "EventGrid", StringComparison.InvariantCultureIgnoreCase) == 0)
+            {
+                var endpoint = configuration.GetValue<string>("EventGrid:Endpoint");
+                var key = configuration.GetValue<string>("EventGrid:Key");
 
-            var connector = new ServiceBusConnector(serviceBusSendConnectionString, serviceBusListenConnectionString);
-            await connector.SendAsync(1);
-            await connector.ReceiveAsync(5_000);
+                var connector = new EventGridConnector(endpoint, key);
+                await connector.SendAsync(1);
+            }
+            if (string.Compare(args[0], "ServiceBus", StringComparison.InvariantCultureIgnoreCase) == 0)
+            {
+                var serviceBusSendConnectionString = configuration.GetValue<string>("ServiceBusSendConnectionString");
+                var serviceBusListenConnectionString = configuration.GetValue<string>("ServiceBusListenConnectionString");
+
+                var connector = new ServiceBusConnector(serviceBusSendConnectionString, serviceBusListenConnectionString);
+                await connector.SendAsync(1);
+                await connector.ReceiveAsync(5_000);
+            }
 
             Console.WriteLine("Done!");
         }
