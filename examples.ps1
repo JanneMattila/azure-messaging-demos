@@ -22,7 +22,7 @@ $body
 
 Invoke-RestMethod `
     -Body $body `
-    -ContentType "application/json" `
+    -ContentType "application/atom+xml;type=entry;charset=utf-8" `
     -Method "POST" `
     -Authentication Bearer `
     -Token $accessToken `
