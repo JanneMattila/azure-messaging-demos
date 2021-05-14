@@ -40,6 +40,7 @@ namespace AzureMessagingDemos
 
                 var connector = new KafkaConnector(kafkaServers, kafkaConnectionString, kafkaTopic);
                 await connector.SendAsync(1);
+                await connector.ReceiveAsync(0);
             }
 
             Console.WriteLine("Done!");
