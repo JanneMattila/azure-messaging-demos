@@ -23,14 +23,23 @@ namespace AzureMessagingDemos
                 var connector = new EventGridConnector(endpoint, key);
                 await connector.SendAsync(1);
             }
-            if (string.Compare(args[0], "ServiceBus", StringComparison.InvariantCultureIgnoreCase) == 0)
+            else if (string.Compare(args[0], "ServiceBus", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
-                var serviceBusSendConnectionString = configuration.GetValue<string>("ServiceBusSendConnectionString");
-                var serviceBusListenConnectionString = configuration.GetValue<string>("ServiceBusListenConnectionString");
+                var serviceBusSendConnectionString = configuration.GetValue<string>("ServiceBus:SendConnectionString");
+                var serviceBusListenConnectionString = configuration.GetValue<string>("ServiceBus:ListenConnectionString");
 
                 var connector = new ServiceBusConnector(serviceBusSendConnectionString, serviceBusListenConnectionString);
                 await connector.SendAsync(1);
                 await connector.ReceiveAsync(5_000);
+            }
+            else if (string.Compare(args[0], "Kafka", StringComparison.InvariantCultureIgnoreCase) == 0)
+            {
+                var kafkaServers = configuration.GetValue<string>("Kafka:Servers");
+                var kafkaConnectionString = configuration.GetValue<string>("Kafka:ConnectionString");
+                var kafkaTopic = configuration.GetValue<string>("Kafka:Topic");
+
+                var connector = new KafkaConnector(kafkaServers, kafkaConnectionString, kafkaTopic);
+                await connector.SendAsync(1);
             }
 
             Console.WriteLine("Done!");
