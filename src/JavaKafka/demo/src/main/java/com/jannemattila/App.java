@@ -16,9 +16,9 @@ public class App
     public static void main(String[] args) throws Exception
     {
         var properties = "Local.properties";
-        if (args.length == 2) {
-            properties = args[1];
-        }
+        if (args.length == 1) {
+            properties = args[0];
+        }   
 
         System.out.println("Kafka messaging demo");
         var configurationFile = Path.of(properties).toRealPath().toString();
@@ -27,6 +27,9 @@ public class App
         var inputStream = new FileInputStream(configurationFile);
         props.load(inputStream);
         inputStream.close();
+
+        props.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.setProperty("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         
         var producer = new KafkaProducer<String, String>(props);
         producer.close();
