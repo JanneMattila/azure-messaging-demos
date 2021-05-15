@@ -19,17 +19,11 @@
 		"configurations": [
 			{
 				"type": "java",
-				"name": "Launch Current File",
-				"request": "launch",
-				"mainClass": "${file}"
-			},
-			{
-				"type": "java",
 				"name": "Java - Launch App",
 				"request": "launch",
 				"mainClass": "com.jannemattila.App",
 				"projectName": "demo",
-				"args": "EventHub.properties"
+				"args": "forwarder EventHub2.properties"
 			}
 		]
 	}
