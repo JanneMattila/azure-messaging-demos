@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.Producer;
 
 import java.io.FileInputStream;
+import java.nio.file.Path;
 import java.util.Properties;
 
 public class App 
@@ -19,10 +20,11 @@ public class App
             properties = args[1];
         }
 
-        System.out.println("Kafka messaging demo (" + properties + ")");
-
+        System.out.println("Kafka messaging demo");
+        var configurationFile = Path.of(properties).toRealPath().toString();
+        System.out.println("Using configuration: " + configurationFile);
         var props = new Properties();
-        var inputStream = new FileInputStream(properties);
+        var inputStream = new FileInputStream(configurationFile);
         props.load(inputStream);
         inputStream.close();
         
