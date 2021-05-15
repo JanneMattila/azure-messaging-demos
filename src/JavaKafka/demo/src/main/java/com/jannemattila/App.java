@@ -42,6 +42,8 @@ public class App
             producer.send(new ProducerRecord<String, String>(topic, Integer.toString(i), Integer.toString(i)));
         }
 
+        props.remove(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG);
+        props.remove(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG);
         producer.close();
 
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
