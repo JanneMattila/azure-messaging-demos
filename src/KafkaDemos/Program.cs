@@ -1,5 +1,6 @@
 ﻿using Avro.Generic;
 using Confluent.Kafka;
+using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using KafkaDemos;
 using Microsoft.Azure.WebJobs.Extensions.Kafka;
@@ -36,3 +37,19 @@ foreach (var field in genericRecord.Schema.Fields)
 
 var carJson = JsonConvert.SerializeObject(properties);
 Console.WriteLine(carJson);
+
+// Setup local Kafka using these instructions:
+// https://docs.confluent.io/platform/current/platform-quickstart.html#cp-quick-start-docker
+// 1) docker-compose up -d
+// 2) http://localhost:9021/clusters
+// 3) Create topic "cars" with schema from CarRecord.cs
+var registry = new CachedSchemaRegistryClient(new SchemaRegistryConfig
+{
+    Url = "http://localhost:8081",
+    BasicAuthUserInfo = "user:password"
+});
+
+var avroDeserializerWithRegistry = new AvroDeserializer<GenericRecord>(registry);
+var record = await avroDeserializerWithRegistry.DeserializeAsync(avroBytesRead, false, SerializationContext.Empty);
+
+Console.WriteLine(record.GetValue(0));

@@ -6,6 +6,31 @@ namespace KafkaDemos;
 
 public class CarRecord : ISpecificRecord
 {
+    /*
+    {
+      "type": "record",
+      "name": "CarRecord",
+      "namespace": "com.jannemattila",
+      "fields": [
+        {
+          "name": "carid",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "type": "string"
+        },
+        {
+          "name": "manufacturer",
+          "type": "string"
+        },
+        {
+          "name": "year",
+          "type": "long"
+        }
+      ]
+    }
+         */
     public const string SchemaText = @"
        {
   ""type"": ""record"",

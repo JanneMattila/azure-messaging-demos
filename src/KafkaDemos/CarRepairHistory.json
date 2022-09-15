@@ -1,0 +1,39 @@
+{
+	"type": "record",
+	"name": "carrepairhistory",
+	"namespace": "com.jannemattila",
+	"fields": [
+		{
+			"name": "car",
+			"type": {
+				"type": "record",
+				"name": "car",
+				"fields": [
+					{
+						"name": "carid",
+						"type": "string"
+					},
+					{
+						"name": "history",
+						"type": {
+							"type": "record",
+							"name": "history",
+							"fields": [
+								{
+									"name": "date",
+									"type": "string",
+									"doc": "Repair date in yyyy-mm-dd format."
+								},
+								{
+									"name": "cost",
+									"type": "double",
+									"doc": "Repair cost in euros."
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}
