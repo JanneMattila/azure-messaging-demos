@@ -1,40 +1,40 @@
 ﻿using Azure;
+using Azure.Messaging;
 using Azure.Messaging.EventGrid;
 using AzureMessagingDemos.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AzureMessagingDemos
+namespace AzureMessagingDemos;
+
+public class EventGridConnector
 {
-    public class EventGridConnector
+    private readonly EventGridPublisherClient _sender;
+
+    public EventGridConnector(string endpoint, string key)
     {
-        private readonly EventGridPublisherClient _sender;
+        _sender = new EventGridPublisherClient(
+            new Uri(endpoint), new AzureKeyCredential(key));
+    }
 
-        public EventGridConnector(string endpoint, string key)
+    public async Task SendAsync(int id)
+    {
+        var data = new Data
         {
-            _sender = new EventGridPublisherClient(
-                new Uri(endpoint), new AzureKeyCredential(key));
-        }
-
-        public async Task SendAsync(int id)
+            ID = id.ToString(),
+            Date = DateTime.UtcNow
+        };
+        var events = new List<CloudEvent>()
         {
-            var data = new Data
-            {
-                ID = id.ToString(),
-                Date = DateTime.UtcNow
-            };
-            var events = new List<CloudEvent>()
-            {
-                new CloudEvent(
-                    "/azuremessagingdemo/source", 
-                    "AzureMessagingDemos.RecordUpdated", 
-                    data)
-            };
+            new CloudEvent(
+                "/azuremessagingdemo/source",
+                "AzureMessagingDemos.RecordUpdated",
+                data)
+        };
 
-            await _sender.SendEventsAsync(events);
+        await _sender.SendEventsAsync(events);
 
-            Console.Write("+");
-        }
+        Console.Write("+");
     }
 }
