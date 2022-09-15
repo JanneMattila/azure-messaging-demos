@@ -1,4 +1,5 @@
-﻿using Avro.Generic;
+﻿using Avro;
+using Avro.Generic;
 using Confluent.Kafka;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
@@ -62,6 +63,23 @@ foreach (var subject in subjects)
     Console.WriteLine(subject);
 }
 
-var registeredSchema = (await registry.GetLatestSchemaAsync("car-repairs-value")) ?? throw new Exception("Schema not found");
-var schema = Avro.Schema.Parse(registeredSchema.SchemaString);
+var carRepairHistoryRegisteredSchema = (await registry.GetLatestSchemaAsync("car-repairs-value")) ?? throw new Exception("Schema not found");
+var carHistorySchema = (RecordSchema)Avro.Schema.Parse(carRepairHistoryRegisteredSchema.SchemaString);
+var carRepairHistorySchema = (RecordSchema)carHistorySchema["history"].Schema;
+
+var carHistoryItem = new GenericRecord(carRepairHistorySchema);
+carHistoryItem.Add("date", "2022-09-15");
+carHistoryItem.Add("cost", 15000.67);
+
+var carHistoryRecord = new GenericRecord(carHistorySchema);
+carHistoryRecord.Add("carid", "12345");
+carHistoryRecord.Add("history", carHistoryItem);
+
 var avroSerializerGeneric = new AvroSerializer<GenericRecord>(registry);
+
+var carHistoryData = await avroSerializerGeneric.SerializeAsync(carHistoryRecord, SerializationContext.Empty);
+Console.WriteLine($"Data size: {carHistoryData.Length}");
+File.WriteAllBytes("carhistory.avro", carHistoryData);
+
+// 5) Clean up
+// docker-compose down
