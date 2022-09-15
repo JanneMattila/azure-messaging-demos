@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 var localSchemaRegistry = new LocalSchemaRegistry(CarRecord.SchemaText);
 
-// Create avro file
+// Create car avro file
 var avroSerializer = new AvroSerializer<CarRecord>(localSchemaRegistry);
 var avroBytesWrite = await avroSerializer.SerializeAsync(new CarRecord()
 {
@@ -20,7 +20,7 @@ var avroBytesWrite = await avroSerializer.SerializeAsync(new CarRecord()
 
 File.WriteAllBytes("car.avro", avroBytesWrite);
 
-// Read avro file
+// Read car avro file
 var avroBytesRead = await File.ReadAllBytesAsync("car.avro");
 
 var avroDeserializer = new AvroDeserializer<GenericRecord>(localSchemaRegistry);
@@ -53,3 +53,15 @@ var avroDeserializerWithRegistry = new AvroDeserializer<GenericRecord>(registry)
 var record = await avroDeserializerWithRegistry.DeserializeAsync(avroBytesRead, false, SerializationContext.Empty);
 
 Console.WriteLine(record.GetValue(0));
+
+// 4) Create topic "car-repairs" with schema CarRepairHistory.json
+// "com.jannemattila.carrepairhistory"
+var subjects = await registry.GetAllSubjectsAsync();
+foreach (var subject in subjects)
+{
+    Console.WriteLine(subject);
+}
+
+var registeredSchema = (await registry.GetLatestSchemaAsync("car-repairs-value")) ?? throw new Exception("Schema not found");
+var schema = Avro.Schema.Parse(registeredSchema.SchemaString);
+var avroSerializerGeneric = new AvroSerializer<GenericRecord>(registry);
