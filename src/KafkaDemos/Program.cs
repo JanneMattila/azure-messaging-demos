@@ -75,11 +75,41 @@ var carHistoryRecord = new GenericRecord(carHistorySchema);
 carHistoryRecord.Add("carid", "12345");
 carHistoryRecord.Add("history", carHistoryItem);
 
-var avroSerializerGeneric = new AvroSerializer<GenericRecord>(registry);
+var avroSerializerCarHistory = new AvroSerializer<GenericRecord>(registry);
 
-var carHistoryData = await avroSerializerGeneric.SerializeAsync(carHistoryRecord, SerializationContext.Empty);
+var carHistoryData = await avroSerializerCarHistory.SerializeAsync(carHistoryRecord, SerializationContext.Empty);
 Console.WriteLine($"Data size: {carHistoryData.Length}");
 File.WriteAllBytes("carhistory.avro", carHistoryData);
 
-// 5) Clean up
+// 5) Submit data to "cars" topic in Avro format
+var carsRegisteredSchema = (await registry.GetLatestSchemaAsync("cars-value")) ?? throw new Exception("Schema not found");
+var carsSchema = (RecordSchema)Avro.Schema.Parse(carsRegisteredSchema.SchemaString);
+
+var id = DateTime.Now.ToString("yyyyMMddmmhhss");
+var carItem = new GenericRecord(carsSchema);
+carItem.Add("carid", id);
+carItem.Add("manufacturer", "Daewoo");
+carItem.Add("model", "Matiz");
+carItem.Add("year", 2004L);
+
+var config = new Dictionary<string, string>
+{
+    { "bootstrap.servers", "localhost:9092" },
+    { "security.protocol", "PLAINTEXT" },
+    { "sasl.mechanism", "PLAIN" },
+    { "sasl.username", "$ConnectionString" },
+    { "sasl.password", "password" }
+};
+
+var localSchemaRegistryCar = new LocalSchemaRegistry(carsRegisteredSchema.SchemaString);
+var avroSerializerCar = new AvroSerializer<GenericRecord>(localSchemaRegistryCar);
+
+var carData = await avroSerializerCar.SerializeAsync(carItem, SerializationContext.Empty);
+
+var sender = new ProducerBuilder<string, byte[]>(config).Build();
+
+var deliveryResult = await sender.ProduceAsync("cars", new Message<string, byte[]> { Key = id.ToString(), Value = carData });
+Console.WriteLine(deliveryResult.Key);
+
+// 6) Clean up
 // docker-compose down
