@@ -5,14 +5,14 @@ $url
 
 $accessToken = ConvertTo-SecureString -AsPlainText -String (az account get-access-token --resource https://eventhubs.azure.net --query accessToken -o TSV)
 $body = ConvertTo-Json @{
-    "specversion" = "1.0"
-    "type"        = "ERP.Sales.Order.Created"
-    "source"      = "/mycontext"
-    "subject"     = $null
-    "id"          = "C1234-1234-1234"
-    "time"        = [System.DateTime]::UtcNow
+    "specversion"     = "1.0"
+    "type"            = "ERP.Sales.Order.Created"
+    "source"          = "/mycontext"
+    "subject"         = $null
+    "id"              = "C1234-1234-1234"
+    "time"            = [System.DateTime]::UtcNow
     "datacontenttype" = "application/json"
-    "data" = @{
+    "data"            = @{
         "appinfoA" = "abc"
         "appinfoB" = 123
         "appinfoC" = $true
