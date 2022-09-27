@@ -5,11 +5,13 @@ using Confluent.SchemaRegistry.Serdes;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Kafka;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace KafkaFunc
 {
-    public class KafkaFunction
+    public class KafkaCarRepairsFunction
     {
         // KafkaTrigger sample
         // Consume the message from "cars" on the LocalBroker.
@@ -17,10 +19,10 @@ namespace KafkaFunc
         // For EventHubs
         // "BrokerList": "{EVENT_HUBS_NAMESPACE}.servicebus.windows.net:9093"
         // "Password":"{EVENT_HUBS_CONNECTION_STRING}
-        [FunctionName("KafkaFunction")]
+        [FunctionName("KafkaCarRepairsFunction")]
         public static async Task Run(
             [KafkaTrigger("BrokerList",
-                          "cars",
+                          "car-repairs",
                           Username = "$ConnectionString",
                           Password = "%Password%",
                           //Protocol = BrokerProtocol.SaslSsl,
@@ -39,7 +41,31 @@ namespace KafkaFunc
             {
                 var record = await avroDeserializerWithRegistry.DeserializeAsync(eventData.Value, false, SerializationContext.Empty);
 
-                log.LogInformation($"Car: {record["year"]}");
+                var properties = new Dictionary<string, object>();
+                FillProperties(record, properties);
+
+                var json = JsonConvert.SerializeObject(properties);
+                log.LogInformation($"Entire record: {json}");
+            }
+        }
+
+        private static void FillProperties(GenericRecord record, Dictionary<string, object> properties)
+        {
+            foreach (var field in record.Schema.Fields)
+            {
+                if (record.TryGetValue(field.Name, out var value))
+                {
+                    if (value is GenericRecord)
+                    {
+                        var subProperties = new Dictionary<string, object>();
+                        FillProperties((GenericRecord)value, subProperties);
+                        properties[field.Name] = subProperties;
+                    }
+                    else
+                    {
+                        properties[field.Name] = value;
+                    }
+                }
             }
         }
     }

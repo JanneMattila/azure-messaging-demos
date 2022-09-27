@@ -108,8 +108,11 @@ var carData = await avroSerializerCar.SerializeAsync(carItem, SerializationConte
 
 var sender = new ProducerBuilder<string, byte[]>(config).Build();
 
-var deliveryResult = await sender.ProduceAsync("cars", new Message<string, byte[]> { Key = id.ToString(), Value = carData });
-Console.WriteLine(deliveryResult.Key);
+var deliveryResultCar = await sender.ProduceAsync("cars", new Message<string, byte[]> { Key = id.ToString(), Value = carData });
+Console.WriteLine(deliveryResultCar.Key);
+
+var deliveryResultCarHistory = await sender.ProduceAsync("car-repairs", new Message<string, byte[]> { Key = id.ToString(), Value = carHistoryData });
+Console.WriteLine(deliveryResultCarHistory.Key);
 
 // 6) Clean up
 // docker-compose down
