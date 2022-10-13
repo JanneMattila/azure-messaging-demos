@@ -1,6 +1,5 @@
-﻿using AzureMessagingDemos.Interfaces;
-using Microsoft.Azure.ServiceBus;
-using Microsoft.Azure.ServiceBus.Core;
+﻿using Azure.Messaging.ServiceBus;
+using AzureMessagingDemos.Interfaces;
 using System;
 using System.Text;
 using System.Text.Json;
@@ -10,21 +9,22 @@ namespace AzureMessagingDemos;
 
 public class ServiceBusConnector
 {
-    private readonly string _sendConnectionString;
-    private readonly string _listenConnectionString;
+    private readonly ServiceBusSender _sender;
+    private readonly ServiceBusReceiver _receiver;
 
-    private readonly MessageSender _sender;
-
-    public ServiceBusConnector(string sendConnectionString, string listenConnectionString)
+    public ServiceBusConnector(string sendConnectionString, string listenConnectionString, string queueName)
     {
-        _sendConnectionString = sendConnectionString;
-        _listenConnectionString = listenConnectionString;
-
-        var connectionStringBuilder = new ServiceBusConnectionStringBuilder(_sendConnectionString)
+        var clientSender = new ServiceBusClient(sendConnectionString, new ServiceBusClientOptions
         {
-            TransportType = TransportType.AmqpWebSockets
-        };
-        _sender = new MessageSender(connectionStringBuilder);
+            TransportType = ServiceBusTransportType.AmqpWebSockets
+        });
+        _sender = clientSender.CreateSender(queueName);
+
+        var clientReceiver = new ServiceBusClient(listenConnectionString, new ServiceBusClientOptions
+        {
+            TransportType = ServiceBusTransportType.AmqpWebSockets
+        });
+        _receiver = clientReceiver.CreateReceiver(queueName);
     }
 
     public async Task SendAsync(int id)
@@ -36,25 +36,20 @@ public class ServiceBusConnector
         };
         var payloadJson = JsonSerializer.Serialize(data);
         var payload = Encoding.UTF8.GetBytes(payloadJson);
-        var request = new Message(payload);
+        var request = new ServiceBusMessage(payload);
 
-        await _sender.SendAsync(request).ConfigureAwait(false);
+        await _sender.SendMessageAsync(request).ConfigureAwait(false);
 
         Console.Write("+");
     }
 
     public async Task ReceiveAsync(int timeout)
     {
-        var connectionStringBuilder = new ServiceBusConnectionStringBuilder(_listenConnectionString)
-        {
-            TransportType = TransportType.AmqpWebSockets
-        };
-        var receiver = new MessageReceiver(connectionStringBuilder);
         var messageLastReceived = DateTime.UtcNow;
 
         while (true)
         {
-            var message = await receiver.ReceiveAsync().ConfigureAwait(false);
+            var message = await _receiver.ReceiveMessageAsync().ConfigureAwait(false);
             if (message != null)
             {
                 var processingDelay = messageLastReceived;
@@ -64,7 +59,7 @@ public class ServiceBusConnector
                     await Task.Delay(timeout);
                 }
 
-                await receiver.CompleteAsync(message.SystemProperties.LockToken);
+                await _receiver.CompleteMessageAsync(message).ConfigureAwait(false);
                 var payloadJson = Encoding.UTF8.GetString(message.Body);
                 var data = JsonSerializer.Deserialize<Data>(payloadJson);
                 Console.WriteLine($"ID: {data.ID} - E2E: {(DateTime.UtcNow - data.Date).TotalMilliseconds} ms - processing delay: {(messageReceived - messageLastReceived).TotalMilliseconds} ms");

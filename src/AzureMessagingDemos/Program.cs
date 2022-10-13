@@ -27,10 +27,11 @@ class Program
         {
             var serviceBusSendConnectionString = configuration.GetValue<string>("ServiceBus:SendConnectionString");
             var serviceBusListenConnectionString = configuration.GetValue<string>("ServiceBus:ListenConnectionString");
+            var serviceBusTopic = configuration.GetValue<string>("ServiceBus:Topic");
 
-            var connector = new ServiceBusConnector(serviceBusSendConnectionString, serviceBusListenConnectionString);
+            var connector = new ServiceBusConnector(serviceBusSendConnectionString, serviceBusListenConnectionString, serviceBusTopic);
             await connector.SendAsync(1);
-            await connector.ReceiveAsync(5_000);
+            await connector.ReceiveAsync(0);
         }
         else if (string.Compare(args[0], "Kafka", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
