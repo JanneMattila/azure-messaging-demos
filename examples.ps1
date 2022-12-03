@@ -1,5 +1,9 @@
 $eventHubNamespace = "<your event hub namespace name>"
 $eventHubInstance = "<your event hub instance name>"
+
+$eventHubNamespace = "home-assistant-0010"
+$eventHubInstance = "history"
+
 $url = "https://$eventHubNamespace.servicebus.windows.net/$eventHubInstance/messages?api-version=2014-01"
 $url
 
@@ -19,6 +23,7 @@ $body = ConvertTo-Json @{
     }
 }
 $body
+$body = "{}"
 
 Invoke-RestMethod `
     -Body $body `

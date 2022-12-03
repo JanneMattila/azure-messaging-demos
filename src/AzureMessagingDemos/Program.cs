@@ -43,6 +43,17 @@ class Program
             await connector.SendAsync(1);
             await connector.ReceiveAsync(0);
         }
+        else if (string.Compare(args[0], "MQTT", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            var mqttServer = configuration.GetValue<string>("MQTT:Server");
+            var mqttUsername = configuration.GetValue<string>("MQTT:Username");
+            var mqttPassword = configuration.GetValue<string>("MQTT:Password");
+            var mqttTopic = configuration.GetValue<string>("MQTT:Topic");
+
+            var connector = new MQTTConnector(mqttServer, mqttUsername, mqttPassword, mqttTopic);
+            await connector.SendAsync(1);
+            await connector.ReceiveAsync(0);
+        }
 
         Console.WriteLine("Done!");
     }
