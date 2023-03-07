@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KafkaDemos", "src\KafkaDemo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KafkaFunc", "src\KafkaFunc\KafkaFunc.csproj", "{96909A6E-6A0C-48D2-AD31-0AEBCD27D69E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureDigitalTwinsUpdaterFunc", "src\AzureDigitalTwinsUpdaterFunc\AzureDigitalTwinsUpdaterFunc.csproj", "{C86D9D84-424E-42D6-80A3-CFF8F760B699}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{96909A6E-6A0C-48D2-AD31-0AEBCD27D69E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96909A6E-6A0C-48D2-AD31-0AEBCD27D69E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96909A6E-6A0C-48D2-AD31-0AEBCD27D69E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C86D9D84-424E-42D6-80A3-CFF8F760B699}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C86D9D84-424E-42D6-80A3-CFF8F760B699}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C86D9D84-424E-42D6-80A3-CFF8F760B699}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C86D9D84-424E-42D6-80A3-CFF8F760B699}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{839F007E-785F-4AFC-B327-D595C2FD5276} = {E74445DD-28F2-4920-961A-C3778DA73664}
 		{84DC4B10-EC17-4B2F-97DB-B00CA1DEAB8C} = {E74445DD-28F2-4920-961A-C3778DA73664}
 		{96909A6E-6A0C-48D2-AD31-0AEBCD27D69E} = {E74445DD-28F2-4920-961A-C3778DA73664}
+		{C86D9D84-424E-42D6-80A3-CFF8F760B699} = {E74445DD-28F2-4920-961A-C3778DA73664}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F99521D6-99C8-41D7-83DC-3D5523498EE7}
