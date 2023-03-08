@@ -26,6 +26,12 @@ $body = ConvertTo-Json @{
         "appinfoC" = $true
     }
 }
+
+$body = ConvertTo-Json @{
+    "id"    = "3752069677"
+    "value" = 67
+}
+
 $body
 
 Invoke-RestMethod `

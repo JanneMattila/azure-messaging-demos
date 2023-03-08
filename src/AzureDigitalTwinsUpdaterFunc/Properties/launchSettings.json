@@ -3,7 +3,10 @@
     "AzureDigitalTwinsUpdaterFunc": {
       "commandName": "Project",
       "commandLineArgs": "--port 7137",
-      "launchBrowser": false
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ADT_INSTANCE_URL": "https://<your-adt-instance>.digitaltwins.azure.net"
+      }
     }
   }
 }
