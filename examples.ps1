@@ -1,13 +1,17 @@
 $eventHubNamespace = "<your event hub namespace name>"
 $eventHubInstance = "<your event hub instance name>"
-
-$eventHubNamespace = "home-assistant-0010"
-$eventHubInstance = "history"
+$tenantId = "<your tenant id>"
 
 $url = "https://$eventHubNamespace.servicebus.windows.net/$eventHubInstance/messages?api-version=2014-01"
 $url
 
-$accessToken = ConvertTo-SecureString -AsPlainText -String (az account get-access-token --resource https://eventhubs.azure.net --query accessToken -o TSV)
+Login-AzAccount
+Login-AzAccount -Tenant $tenantId
+
+$accessToken = Get-AzAccessToken -ResourceUrl https://eventhubs.azure.net
+$accessToken.Token
+
+$accessToken = ConvertTo-SecureString -AsPlainText -String $accessToken.Token
 $body = ConvertTo-Json @{
     "specversion"     = "1.0"
     "type"            = "ERP.Sales.Order.Created"
@@ -23,7 +27,6 @@ $body = ConvertTo-Json @{
     }
 }
 $body
-$body = "{}"
 
 Invoke-RestMethod `
     -Body $body `
