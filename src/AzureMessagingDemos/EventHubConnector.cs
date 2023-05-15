@@ -3,17 +3,21 @@ using Azure.Messaging.EventHubs.Processor;
 using Azure.Messaging.EventHubs.Producer;
 using Azure.Storage.Blobs;
 using System;
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace AzureMessagingDemos;
 
+// Example from here:
+// https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/eventhub/Azure.Messaging.EventHubs.Processor/samples/Sample01_HelloWorld.md
 public class EventHubConnector
 {
     private readonly EventHubProducerClient _sender;
     private readonly EventProcessorClient _receiver;
     private DateTime _messageLastReceived = DateTime.UtcNow;
+    private ConcurrentDictionary<string, int> _partitionEventCount = new ConcurrentDictionary<string, int>();
 
     public EventHubConnector(string blobConnectionString, string blobContainerName, string sendConnectionString, string listenConnectionString, string hubName, string consumerGroup)
     {
@@ -54,21 +58,43 @@ public class EventHubConnector
         await _receiver.StopProcessingAsync().ConfigureAwait(false);
     }
 
-    private Task ProcessEventHandler(ProcessEventArgs eventArgs)
+    private async Task ProcessEventHandler(ProcessEventArgs args)
     {
-        var messageReceived = DateTime.UtcNow;
-        var payloadJson = Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray());
-        var data = JsonSerializer.Deserialize<Interfaces.Data>(payloadJson);
-        Console.WriteLine($"ID: {data.ID} - E2E: {(DateTime.UtcNow - data.Date).TotalMilliseconds} ms - processing delay: {(messageReceived - _messageLastReceived).TotalMilliseconds} ms");
-        _messageLastReceived = messageReceived;
-        return Task.CompletedTask;
+        try
+        {
+            if (args.CancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var messageReceived = DateTime.UtcNow;
+            var payloadJson = Encoding.UTF8.GetString(args.Data.EventBody.ToArray());
+            var data = JsonSerializer.Deserialize<Interfaces.Data>(payloadJson);
+            Console.WriteLine($"ID: {data.ID} - E2E: {(DateTime.UtcNow - data.Date).TotalMilliseconds} ms - processing delay: {(messageReceived - _messageLastReceived).TotalMilliseconds} ms");
+            _messageLastReceived = messageReceived;
+
+            var partition = args.Partition.PartitionId;
+            var eventsSinceLastCheckpoint = _partitionEventCount.AddOrUpdate(
+                key: partition,
+                addValue: 1,
+                updateValueFactory: (_, currentCount) => currentCount + 1);
+
+            if (eventsSinceLastCheckpoint >= 50)
+            {
+                await args.UpdateCheckpointAsync();
+                _partitionEventCount[partition] = 0;
+            }
+        }
+        catch (Exception)
+        {
+        }
     }
 
-    private Task ProcessErrorHandler(ProcessErrorEventArgs eventArgs)
+    private Task ProcessErrorHandler(ProcessErrorEventArgs args)
     {
         // Write details about the error to the console window
-        Console.WriteLine($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
-        Console.WriteLine(eventArgs.Exception.Message);
+        Console.WriteLine($"\tPartition '{args.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
+        Console.WriteLine(args.Exception.Message);
         return Task.CompletedTask;
     }
 }
