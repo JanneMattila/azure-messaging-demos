@@ -15,12 +15,12 @@ public class EventHubConnector
     private readonly EventProcessorClient _receiver;
     private DateTime _messageLastReceived = DateTime.UtcNow;
 
-    public EventHubConnector(string blobConnectionString, string blobContainerName, string sendConnectionString, string listenConnectionString, string hubName, string consumerGroupName)
+    public EventHubConnector(string blobConnectionString, string blobContainerName, string sendConnectionString, string listenConnectionString, string hubName, string consumerGroup)
     {
         _sender = new EventHubProducerClient(sendConnectionString, hubName);
 
         var storageClient = new BlobContainerClient(blobConnectionString, blobContainerName);
-        _receiver = new EventProcessorClient(storageClient, consumerGroupName, listenConnectionString, hubName);
+        _receiver = new EventProcessorClient(storageClient, consumerGroup, listenConnectionString, hubName);
         _receiver.ProcessEventAsync += ProcessEventHandler;
         _receiver.ProcessErrorAsync += ProcessErrorHandler;
     }

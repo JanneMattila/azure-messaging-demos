@@ -23,6 +23,21 @@ class Program
             var connector = new EventGridConnector(endpoint, key);
             await connector.SendAsync(1);
         }
+        else if (string.Compare(args[0], "EventHub", StringComparison.InvariantCultureIgnoreCase) == 0)
+        {
+            var eventHubBlobConnectionString = configuration.GetValue<string>("EventHub:BlobConnectionString");
+            var eventHubBlobContainerName = configuration.GetValue<string>("EventHub:BlobContainerName");
+            var eventHubSendConnectionString = configuration.GetValue<string>("EventHub:SendConnectionString");
+            var eventHubListenConnectionString = configuration.GetValue<string>("EventHub:ListenConnectionString");
+            var eventHubName = configuration.GetValue<string>("EventHub:Name");
+            var eventHubConsumerGroup = configuration.GetValue<string>("EventHub:ConsumerGroup");
+
+            var connector = new EventHubConnector(eventHubBlobConnectionString, eventHubBlobContainerName,
+                eventHubSendConnectionString, eventHubListenConnectionString,
+                eventHubName, eventHubConsumerGroup);
+            //await connector.SendAsync(1);
+            await connector.ReceiveAsync(60_000);
+        }
         else if (string.Compare(args[0], "ServiceBus", StringComparison.InvariantCultureIgnoreCase) == 0)
         {
             var serviceBusSendConnectionString = configuration.GetValue<string>("ServiceBus:SendConnectionString");
